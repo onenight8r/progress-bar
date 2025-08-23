@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rating Circles</title>
+  <style>
+    body {
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #b388ff; /* lavender purple background */
+  margin: 0;
+  padding: 20px;
+  color: #fff;
+}
+
+.dashboard {
+  border: none;
+  border-radius: 20px;
+  padding: 20px;
+  background: #2d0b63; /* deep purple card */
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  width: 95%;
+  max-width: 1100px;
+  position: relative;
+}
+
+.date {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 0.9rem;
+  color: #cfc2ff;
+  font-weight: 500;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 30px;
+  justify-items: center;
+  margin-top: 60px;
+}
+
+.circle-card {
+  perspective: 1000px;
+  width: 150px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.circle-inner {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+  border-radius: 50%;
+}
+
+.circle-front, .circle-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #4b0a91; /* neon purple */
+  box-shadow: 
+    0 8px 16px rgba(0,0,0,0.3),
+    0 0 20px rgba(255,255,255,0.1),
+    inset 0 0 10px rgba(255,255,255,0.2);
+}
+
+.circle-back {
+  transform: rotateY(180deg);
+  background: #37006d; 
+  border-radius: 20px;
+  border: 2px solid #7a3fff;
+}
+
+.circle-front span {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #fff;
+  z-index: 2;
+}
+
+.circle-title {
+  margin-top: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #ffe066; /* neon yellow */
+}
+
+.circle-back form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  color: #fff;
+}
+
+.circle-back input {
+  margin: 5px 0;
+  padding: 5px;
+  width: 70px;
+  text-align: center;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  background: #ffe066;
+  color: #2d0b63;
+  font-weight: bold;
+}
+
+.circle-back button {
+  padding: 6px 14px;
+  background: #ff2d96; /* neon pink */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: rotate(-90deg);
+}
+
+circle {
+  fill: none;
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+
+.bg {
+  stroke: rgba(255,255,255,0.1);
+}
+
+.progress {
+  stroke: #4CAF50;
+  transition: stroke-dashoffset 0.6s ease, stroke 0.6s ease;
+}
+
+    .average {
+      margin-top: 30px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="date" id="today-date"></div>
+    <div class="container" id="rating-container"></div>
+    <div class="average" id="average-rating"></div>
+  </div>
+
+  <script>
+    const categories = ["Mind", "Health", "Money", "Sleep", "Career", "Discipline"];
+    const ratings = {Mind: 7, Health: 8, Money: 5, Sleep: 6, Career: 9, Discipline: 7};
+
+    const container = document.getElementById("rating-container");
+
+    categories.forEach(cat => {
+      const card = document.createElement("div");
+      card.className = "circle-card";
+
+      const radius = 60;
+      const circumference = 2 * Math.PI * radius;
+
+      card.innerHTML = `
+        <div class="circle-inner">
+          <div class="circle-front">
+            <svg width="150" height="150">
+              <circle class="bg" cx="75" cy="75" r="${radius}"></circle>
+              <circle class="progress" cx="75" cy="75" r="${radius}" 
+                stroke-dasharray="${circumference}" 
+                stroke-dashoffset="${circumference - (ratings[cat] / 10) * circumference}">
+              </circle>
+            </svg>
+            <span>${ratings[cat]}</span>
+          </div>
+          <div class="circle-back">
+            <form>
+              <label>${cat} Rating</label>
+              <input type="number" min="1" max="10" value="${ratings[cat]}">
+              <button type="submit">Save</button>
+            </form>
+          </div>
+        </div>
+        <div class="circle-title">${cat}</div>
+      `;
+
+      // Flip on click
+      card.querySelector(".circle-inner").addEventListener("click", function(e) {
+        if (!e.target.closest("form")) {
+          card.classList.toggle("flipped");
+        }
+      });
+
+      // Save form
+      card.querySelector("form").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const newVal = parseInt(this.querySelector("input").value);
+        if (newVal < 1 || newVal > 10) return; // safety check
+        ratings[cat] = newVal;
+
+        const progress = card.querySelector(".progress");
+        const span = card.querySelector("span");
+
+        progress.setAttribute("stroke-dashoffset", circumference - (newVal / 10) * circumference);
+        progress.style.stroke = getColor(newVal);
+
+        span.innerText = newVal;
+
+        card.classList.remove("flipped");
+
+        updateAverage();
+      });
+
+      container.appendChild(card);
+    });
+
+    function getColor(value) {
+      if (value >= 8) return "#4CAF50"; // green
+      if (value >= 5) return "#FFC107"; // yellow
+      return "#F44336"; // red
+    }
+
+    function updateAverage() {
+      const sum = Object.values(ratings).reduce((a, b) => a + b, 0);
+      const avg = (sum / categories.length).toFixed(1);
+      document.getElementById("average-rating").innerText = `AVG - ${avg}`;
+    }
+
+    // today's date fixed
+    document.getElementById("today-date").innerText = "TODAY'S DATE - 24 AUG' 25";
+
+    // initial avg
+    updateAverage();
+  </script>
+</body>
+</html>
