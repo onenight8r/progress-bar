@@ -2,29 +2,6 @@
 <html lang="en">
 <head>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyAU8fNHMvaySDjL4BUV1vrfRM6hZ81tJQQ",
-    authDomain: "build-your-life-b88e5.firebaseapp.com",
-    projectId: "build-your-life-b88e5",
-    storageBucket: "build-your-life-b88e5.firebasestorage.app",
-    messagingSenderId: "1014133716094",
-    appId: "1:1014133716094:web:5507147a7c4fc73711d42f",
-    measurementId: "G-RGVT8T96GH"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
 
   <meta charset="UTF-8">
   <title>Rating Circles</title>
@@ -198,10 +175,50 @@ circle {
   stroke: rgba(255,255,255,0.1);
 }
 
+/* --- Keep progress color in sync after reload (no default green) --- */
 .progress {
-  stroke: #4CAF50;
-  transition: stroke-dashoffset 0.6s ease, stroke 0.6s ease;
+  stroke: #999;
+  transition: stroke 0.3s ease, stroke-dashoffset 0.6s ease;
 }
+
+/* 1–4 = red */
+.circle-card:has(.circle-back input[value="1"]) .progress,
+.circle-card:has(.circle-back input[value="2"]) .progress,
+.circle-card:has(.circle-back input[value="3"]) .progress,
+.circle-card:has(.circle-back input[value="4"]) .progress {
+  stroke: #F44336;
+}
+.circle-card:has(.circle-back input[value="1"]) .circle-front .rating,
+.circle-card:has(.circle-back input[value="2"]) .circle-front .rating,
+.circle-card:has(.circle-back input[value="3"]) .circle-front .rating,
+.circle-card:has(.circle-back input[value="4"]) .circle-front .rating {
+  color: #F44336;
+}
+
+/* 5–7 = yellow */
+.circle-card:has(.circle-back input[value="5"]) .progress,
+.circle-card:has(.circle-back input[value="6"]) .progress,
+.circle-card:has(.circle-back input[value="7"]) .progress {
+  stroke: #FFC107;
+}
+.circle-card:has(.circle-back input[value="5"]) .circle-front .rating,
+.circle-card:has(.circle-back input[value="6"]) .circle-front .rating,
+.circle-card:has(.circle-back input[value="7"]) .circle-front .rating {
+  color: #FFC107;
+}
+
+/* 8–10 = green */
+.circle-card:has(.circle-back input[value="8"]) .progress,
+.circle-card:has(.circle-back input[value="9"]) .progress,
+.circle-card:has(.circle-back input[value="10"]) .progress {
+  stroke: #4CAF50;
+}
+.circle-card:has(.circle-back input[value="8"]) .circle-front .rating,
+.circle-card:has(.circle-back input[value="9"]) .circle-front .rating,
+.circle-card:has(.circle-back input[value="10"]) .circle-front .rating {
+  color: #4CAF50;
+}
+
     .circle-card.flipped .circle-inner {
   transform: rotateY(180deg);
 }
@@ -216,102 +233,156 @@ circle {
     <div class="container" id="rating-container"></div>
     <div class="average" id="average-rating"></div>
   </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAU8fNHMvaySDjL4BUV1vrfRM6hZ81tJQQ",
+      authDomain: "build-your-life-b88e5.firebaseapp.com",
+      projectId: "build-your-life-b88e5",
+      storageBucket: "build-your-life-b88e5.firebasestorage.app",
+      messagingSenderId: "1014133716094",
+      appId: "1:1014133716094:web:5507147a7c4fc73711d42f",
+      measurementId: "G-RGVT8T96GH"
+    };
+
+    // Init Firebase + Firestore
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // categories
     const categories = ["Mind", "Health", "Money", "Sleep", "Career", "Discipline"];
-    const ratings = {Mind: 7, Health: 8, Money: 5, Sleep: 6, Career: 9, Discipline: 7};
+
+    // local defaults
+    let ratings = {Mind: 7, Health: 7, Money: 7, Sleep: 7, Career: 7, Discipline: 7};
 
     const container = document.getElementById("rating-container");
 
-    categories.forEach(cat => {
-      const card = document.createElement("div");
-      card.className = "circle-card";
-
-      const radius = 60;
-      const circumference = 2 * Math.PI * radius;
-
-      card.innerHTML = `
-  <div class="circle-inner">
-    <div class="circle-front">
-      <svg width="150" height="150">
-        <circle class="bg" cx="75" cy="75" r="${radius}"></circle>
-        <circle class="progress" cx="75" cy="75" r="${radius}" 
-          stroke-dasharray="${circumference}" 
-          stroke-dashoffset="${circumference - (ratings[cat] / 10) * circumference}">
-        </circle>
-      </svg>
-      <div class="">
-        <span class="material-icons">${getIcon(cat)}</span>
-        <span class="rating">${ratings[cat]}</span>
-      </div>
-    </div>
-    <div class="circle-back">
-      <form>
-        <label>${cat} Rating</label>
-        <input type="number" min="1" max="10" value="${ratings[cat]}">
-        <button type="submit">Save</button>
-      </form>
-    </div>
-  </div>
-  <div class="circle-title">${cat}</div>
-`;
-function getIcon(category) {
-  switch(category) {
-    case "Mind": return "psychology";
-    case "Health": return "fitness_center";
-    case "Money": return "account_balance_wallet";
-    case "Sleep": return "bedtime";
-    case "Career": return "work";
-    case "Discipline": return "self_improvement";
-    default: return "star";
-  }
-}
-
-
-      // Flip on click
-      card.querySelector(".circle-inner").addEventListener("click", function(e) {
-        if (!e.target.closest("form")) {
-          card.classList.toggle("flipped");
+    // ✅ Load ratings from Firestore (or fallback to defaults)
+    async function loadRatings() {
+      try {
+        const ref = doc(db, "users", "defaultUser"); // adjust "users/defaultUser" if you want per-user storage
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          ratings = snap.data();
+        } else {
+          // store defaults if no data exists
+          await setDoc(ref, ratings);
         }
-      });
-
-      // Save form
-      card.querySelector("form").addEventListener("submit", function(e) {
-        e.preventDefault();
-        const newVal = parseInt(this.querySelector("input").value);
-        if (newVal < 1 || newVal > 10) return; // safety check
-        ratings[cat] = newVal;
-
-        const progress = card.querySelector(".progress");
-        const span = card.querySelector(".rating");
-
-
-        progress.setAttribute("stroke-dashoffset", circumference - (newVal / 10) * circumference);
-        progress.style.stroke = getColor(newVal);
-
-        span.innerText = newVal;
-
-        card.classList.remove("flipped");
-
-        updateAverage();
-      });
-
-      container.appendChild(card);
-    });
-
-    function getColor(value) {
-      if (value >= 8) return "#4CAF50"; // green
-      if (value >= 5) return "#FFC107"; // yellow
-      return "#F44336"; // red
+      } catch (err) {
+        console.error("⚠️ Firebase fetch failed, using local defaults", err);
+      }
+      renderCircles();
+      updateAverage();
     }
 
- 
+    // ✅ Save single rating to Firestore
+    async function saveRating() {
+      try {
+        const ref = doc(db, "users", "defaultUser");
+        await setDoc(ref, ratings);
+      } catch (err) {
+        console.error("⚠️ Failed to save rating to Firebase", err);
+      }
+    }
 
-    // today's date fixed
+    function renderCircles() {
+      container.innerHTML = "";
+      categories.forEach(cat => {
+        const card = document.createElement("div");
+        card.className = "circle-card";
+
+        const radius = 60;
+        const circumference = 2 * Math.PI * radius;
+
+        card.innerHTML = `
+          <div class="circle-inner">
+            <div class="circle-front">
+              <svg width="150" height="150">
+                <circle class="bg" cx="75" cy="75" r="${radius}"></circle>
+                <circle class="progress" cx="75" cy="75" r="${radius}" 
+                  stroke-dasharray="${circumference}" 
+                  stroke-dashoffset="${circumference - (ratings[cat] / 10) * circumference}">
+                </circle>
+              </svg>
+              <div class="">
+                <span class="material-icons">${getIcon(cat)}</span>
+                <span class="rating">${ratings[cat]}</span>
+              </div>
+            </div>
+            <div class="circle-back">
+              <form>
+                <label>${cat} Rating</label>
+                <input type="number" min="1" max="10" value="${ratings[cat]}">
+                <button type="submit">Save</button>
+              </form>
+            </div>
+          </div>
+          <div class="circle-title">${cat}</div>
+        `;
+
+        // Flip
+        card.querySelector(".circle-inner").addEventListener("click", function(e) {
+          if (!e.target.closest("form")) {
+            card.classList.toggle("flipped");
+          }
+        });
+
+        // Save form
+        card.querySelector("form").addEventListener("submit", function(e) {
+          e.preventDefault();
+          const newVal = parseInt(this.querySelector("input").value);
+          if (newVal < 1 || newVal > 10) return;
+          ratings[cat] = newVal;
+
+          const progress = card.querySelector(".progress");
+          const span = card.querySelector(".rating");
+
+          progress.setAttribute("stroke-dashoffset", circumference - (newVal / 10) * circumference);
+          progress.style.stroke = getColor(newVal);
+          span.innerText = newVal;
+
+          card.classList.remove("flipped");
+
+          updateAverage();
+          saveRating(); // ✅ push change to Firebase
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    function getIcon(category) {
+      switch(category) {
+        case "Mind": return "psychology";
+        case "Health": return "fitness_center";
+        case "Money": return "account_balance_wallet";
+        case "Sleep": return "bedtime";
+        case "Career": return "work";
+        case "Discipline": return "self_improvement";
+        default: return "star";
+      }
+    }
+
+    function getColor(value) {
+      if (value >= 8) return "#4CAF50";
+      if (value >= 5) return "#FFC107";
+      return "#F44336";
+    }
+
+    function updateAverage() {
+      const avg = Object.values(ratings).reduce((a,b)=>a+b,0) / categories.length;
+      document.getElementById("average-rating").innerText = `Average: ${avg.toFixed(1)}`;
+    }
+
+    // today's date
     document.getElementById("today-date").innerText = "TODAY'S DATE - 24 AUG' 25";
 
-    // initial avg
-    updateAverage();
+    // load everything
+    loadRatings();
   </script>
+ 
 </body>
 </html>
