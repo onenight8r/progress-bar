@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
   <meta charset="UTF-8">
   <title>Rating Circles</title>
   <style>
@@ -39,6 +41,25 @@
   justify-items: center;   /* center each card in its column */
   margin-top: 60px;
   width: 100%;
+}
+.circle-content {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-content .material-icons {
+  font-size: 32px;
+  color: #ffe066;  /* neon yellow */
+  margin-bottom: 5px;
+}
+
+.circle-content .rating {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #fff;
 }
 
 .circle-card {
@@ -183,27 +204,42 @@ circle {
       const circumference = 2 * Math.PI * radius;
 
       card.innerHTML = `
-        <div class="circle-inner">
-          <div class="circle-front">
-            <svg width="150" height="150">
-              <circle class="bg" cx="75" cy="75" r="${radius}"></circle>
-              <circle class="progress" cx="75" cy="75" r="${radius}" 
-                stroke-dasharray="${circumference}" 
-                stroke-dashoffset="${circumference - (ratings[cat] / 10) * circumference}">
-              </circle>
-            </svg>
-            <span>${ratings[cat]}</span>
-          </div>
-          <div class="circle-back">
-            <form>
-              <label>${cat} Rating</label>
-              <input type="number" min="1" max="10" value="${ratings[cat]}">
-              <button type="submit">Save</button>
-            </form>
-          </div>
-        </div>
-        <div class="circle-title">${cat}</div>
-      `;
+  <div class="circle-inner">
+    <div class="circle-front">
+      <svg width="150" height="150">
+        <circle class="bg" cx="75" cy="75" r="${radius}"></circle>
+        <circle class="progress" cx="75" cy="75" r="${radius}" 
+          stroke-dasharray="${circumference}" 
+          stroke-dashoffset="${circumference - (ratings[cat] / 10) * circumference}">
+        </circle>
+      </svg>
+      <div class="circle-content">
+        <span class="material-icons">${getIcon(cat)}</span>
+        <span class="rating">${ratings[cat]}</span>
+      </div>
+    </div>
+    <div class="circle-back">
+      <form>
+        <label>${cat} Rating</label>
+        <input type="number" min="1" max="10" value="${ratings[cat]}">
+        <button type="submit">Save</button>
+      </form>
+    </div>
+  </div>
+  <div class="circle-title">${cat}</div>
+`;
+function getIcon(category) {
+  switch(category) {
+    case "Mind": return "psychology";
+    case "Health": return "fitness_center";
+    case "Money": return "account_balance_wallet";
+    case "Sleep": return "bedtime";
+    case "Career": return "work";
+    case "Discipline": return "self_improvement";
+    default: return "star";
+  }
+}
+
 
       // Flip on click
       card.querySelector(".circle-inner").addEventListener("click", function(e) {
