@@ -56,11 +56,17 @@
   margin-bottom: 5px;
 }
 
-.circle-content .rating {
-  font-size: 1.6rem;
-  font-weight: bold;
-  color: #fff;
+.circle-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
+
 
 .circle-card {
   perspective: 1000px;
@@ -173,6 +179,10 @@ circle {
   stroke: #4CAF50;
   transition: stroke-dashoffset 0.6s ease, stroke 0.6s ease;
 }
+    .circle-card.flipped .circle-inner {
+  transform: rotateY(180deg);
+}
+
 
 
   </style>
@@ -207,7 +217,7 @@ circle {
           stroke-dashoffset="${circumference - (ratings[cat] / 10) * circumference}">
         </circle>
       </svg>
-      <div class="circle-content">
+      <div class="">
         <span class="material-icons">${getIcon(cat)}</span>
         <span class="rating">${ratings[cat]}</span>
       </div>
@@ -250,7 +260,8 @@ function getIcon(category) {
         ratings[cat] = newVal;
 
         const progress = card.querySelector(".progress");
-        const span = card.querySelector("span");
+        const span = card.querySelector(".rating");
+
 
         progress.setAttribute("stroke-dashoffset", circumference - (newVal / 10) * circumference);
         progress.style.stroke = getColor(newVal);
