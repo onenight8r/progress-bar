@@ -4,16 +4,13 @@
   <meta charset="UTF-8">
   <title>Rating Circles</title>
   <style>
-    body {
-  font-family: 'Poppins', sans-serif;
+   body {
+  margin: 0;
+  padding: 0;
+  background: transparent; /* transparent so only the box shows */
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background: transparent; /* lavender purple background */
-  margin: 0;
-  padding: 20px;
-  color: #fff;
 }
 
 .dashboard {
@@ -22,11 +19,10 @@
   padding: 20px;
   background: #2d0b63; /* deep purple card */
   box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-  width: 95%;
-  max-width: 80%;
+  width: 80%;              /* 80% of screen */
+  margin: 0 auto;          /* center horizontally */
   position: relative;
 }
-
 .date {
   position: absolute;
   top: 10px;
@@ -37,19 +33,18 @@
 }
 
 .container {
-   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 40px; /* adjust spacing between circles */
-  justify-items: center;
-  align-items: start;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 40px;               /* spacing between items */
+  justify-items: center;   /* center each card in its column */
   margin-top: 60px;
   width: 100%;
 }
 
 .circle-card {
-   perspective: 1000px;
-  width: 150px;
-  height: 200px;
+  perspective: 1000px;
+  width: 140px;   /* fixed smaller width */
+  height: 180px;  /* shorter height */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -163,6 +158,7 @@ circle {
       font-size: 1.2rem;
       font-weight: bold;
       text-align: center;
+      color: white;
     }
   </style>
 </head>
