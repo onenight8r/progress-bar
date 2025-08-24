@@ -174,13 +174,7 @@ circle {
   transition: stroke-dashoffset 0.6s ease, stroke 0.6s ease;
 }
 
-    .average {
-      margin-top: 30px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      text-align: center;
-      color: white;
-    }
+
   </style>
 </head>
 <body>
@@ -277,11 +271,7 @@ function getIcon(category) {
       return "#F44336"; // red
     }
 
-    function updateAverage() {
-      const sum = Object.values(ratings).reduce((a, b) => a + b, 0);
-      const avg = (sum / categories.length).toFixed(1);
-      document.getElementById("average-rating").innerText = `AVG - ${avg}`;
-    }
+ 
 
     // today's date fixed
     document.getElementById("today-date").innerText = "TODAY'S DATE - 24 AUG' 25";
