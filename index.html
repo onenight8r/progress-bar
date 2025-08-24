@@ -37,15 +37,17 @@
 }
 
 .container {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 30px;
+   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 40px; /* adjust spacing between circles */
   justify-items: center;
+  align-items: start;
   margin-top: 60px;
+  width: 100%;
 }
 
 .circle-card {
-  perspective: 1000px;
+   perspective: 1000px;
   width: 150px;
   height: 200px;
   display: flex;
